@@ -83,55 +83,65 @@ async def process_voice_intake(request: VoiceRequest):
     Returns:
         Agent's response to speak back + current stage
     """
+    try:
+        session_id = request.session_id or request.user_id
 
-    session_id = request.session_id or request.user_id
+        # Get or create session
+        if session_id not in sessions:
+            sessions[session_id] = {
+                "agent": IntakeAgent(),
+                "state": AgentState(
+                    user_id=request.user_id,
+                    privacy_tier="full_support"
+                )
+            }
 
-    # Get or create session
-    if session_id not in sessions:
-        sessions[session_id] = {
-            "agent": IntakeAgent(),
-            "state": AgentState(
-                user_id=request.user_id,
-                privacy_tier="full_support"
-            )
+        session = sessions[session_id]
+        agent = session["agent"]
+        state = session["state"]
+
+        # Add user message
+        state = agent.add_message(state, "user", request.message)
+
+        # Process through intake agent
+        state = await agent.process(state)
+
+        # Get response
+        agent_response = state.messages[-1].content
+
+        # Get current stage
+        current_stage = state.agent_data.get("intake_stage", "greeting")
+
+        # Check if intake complete
+        intake_complete = agent.should_proceed_to_crisis_assessment(state)
+        force_crisis = bool(state.agent_data.get("force_crisis", False))
+        skip_privacy_prompt = bool(state.agent_data.get("skip_privacy_prompt", False))
+
+        # Update session
+        session["state"] = state
+
+        # If intake complete, prepare for crisis assessment
+        if intake_complete and session_id in sessions:
+            # Add crisis agent to session
+            sessions[session_id]["crisis_agent"] = CrisisAgent()
+
+        return VoiceResponse(
+            response=agent_response,
+            stage=current_stage,
+            intake_complete=intake_complete,
+            force_crisis=force_crisis,
+            skip_privacy_prompt=skip_privacy_prompt
+        )
+
+    except Exception as e:
+        import traceback
+        error_detail = {
+            "error": str(e),
+            "type": type(e).__name__,
+            "traceback": traceback.format_exc()
         }
-
-    session = sessions[session_id]
-    agent = session["agent"]
-    state = session["state"]
-
-    # Add user message
-    state = agent.add_message(state, "user", request.message)
-
-    # Process through intake agent
-    state = await agent.process(state)
-
-    # Get response
-    agent_response = state.messages[-1].content
-
-    # Get current stage
-    current_stage = state.agent_data.get("intake_stage", "greeting")
-
-    # Check if intake complete
-    intake_complete = agent.should_proceed_to_crisis_assessment(state)
-    force_crisis = bool(state.agent_data.get("force_crisis", False))
-    skip_privacy_prompt = bool(state.agent_data.get("skip_privacy_prompt", False))
-
-    # Update session
-    session["state"] = state
-
-    # If intake complete, prepare for crisis assessment
-    if intake_complete and session_id in sessions:
-        # Add crisis agent to session
-        sessions[session_id]["crisis_agent"] = CrisisAgent()
-
-    return VoiceResponse(
-        response=agent_response,
-        stage=current_stage,
-        intake_complete=intake_complete,
-        force_crisis=force_crisis,
-        skip_privacy_prompt=skip_privacy_prompt
-    )
+        print(f"ERROR in voice intake: {error_detail}")
+        raise HTTPException(status_code=500, detail=error_detail)
 
 
 @app.post("/therapist/licence-upload")
