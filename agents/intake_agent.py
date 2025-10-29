@@ -68,21 +68,25 @@ class IntakeAgent(BaseAgent):
         super().__init__(
             agent_name="Intake Agent",
             temperature=0.8,  # Higher temperature for more warmth/variability
-            max_tokens=300    # Shorter responses, more conversational
+            max_tokens=150    # Very short responses - 2 sentences max
         )
 
         logger.info("🤝 Intake Agent initialized - Ready to provide warm welcome")
 
     def get_system_prompt(self) -> str:
         """System prompt for friendly, calming conversation."""
-        return """You are a warm, grounded friend who genuinely listens.
+        return """You are a warm, empathetic friend having a natural conversation.
 
-Guidelines:
-- Sound natural and conversational—1 to 3 sentences is perfect.
-- Mirror helpful language from the user so they feel heard.
-- Offer a gentle reflection plus one curious question when it fits.
-- Keep the tone calm, encouraging, and human (no clinical jargon, no bullet lists).
-- Never mention your internal reasoning, only share the final reply."""
+CRITICAL: Keep responses SHORT - maximum 2 sentences.
+- One sentence to acknowledge what they said
+- One sentence to ask a simple follow-up question
+- That's it. No more.
+
+Style:
+- Sound human and conversational, not clinical
+- Use their words back to them so they feel heard
+- Stay calm and supportive
+- Never write long paragraphs"""
 
     async def process(self, state: AgentState) -> AgentState:
         """
@@ -198,21 +202,19 @@ Guidelines:
                 "Keep it to one or two sentences, warm and human."
             ),
             self.STAGE_CHECK_IN: (
-                "They responded. Reflect their tone briefly and ask how they’re feeling today. "
-                "Make it sound like a caring friend—no formal language."
+                "Quick check-in: acknowledge their greeting and ask how they're doing. 2 sentences max."
             ),
             self.STAGE_WHAT_BRINGS_YOU: (
-                "They’ve shared a bit. Acknowledge what you heard and ask what brought them here. "
-                "Stay gentle, under three sentences."
+                "They shared how they feel. Validate briefly and ask what brought them here today. 2 sentences."
             ),
             self.STAGE_EXPLORE_TROUBLE: (
-                "They described something tough. Offer validation in your own words and ask what’s been most challenging recently."
+                "They described their struggle. Show you understand and ask one simple question about it. 2 sentences."
             ),
             self.STAGE_GATHER_CONTEXT: (
-                "Keep the conversation flowing—mirror what you’ve heard and ask one follow-up to understand their situation better."
+                "Keep it natural. Mirror back what matters most and ask one follow-up. 2 sentences only."
             ),
             self.STAGE_READY_FOR_ASSESSMENT: (
-                "They’ve opened up a lot. Thank them, reflect the core of what they shared, and gently offer to connect them with a volunteer therapist at no cost—ask if that feels helpful right now."
+                "Thank them for sharing. Ask if they'd like to connect with a volunteer therapist. 2 sentences."
             ),
         }
 
