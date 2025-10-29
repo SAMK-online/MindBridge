@@ -506,33 +506,37 @@ function VoicePage() {
     setStatusText('Speaking...');
 
     try {
-      const response = await fetch(`${API_URL}/voice/tts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to fetch TTS audio.');
+      // Use browser's built-in Speech Synthesis API (works offline, no API key needed)
+      if (!window.speechSynthesis) {
+        throw new Error('Speech synthesis not supported in this browser.');
       }
 
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-
       await new Promise<void>((resolve, reject) => {
-        const audio = new Audio(url);
-        audio.onended = () => {
-          URL.revokeObjectURL(url);
-          resolve();
-        };
-        audio.onerror = () => {
-          URL.revokeObjectURL(url);
-          reject(new Error('Audio playback failed'));
-        };
-        audio.play().catch(err => {
-          URL.revokeObjectURL(url);
-          reject(err);
-        });
+        const utterance = new SpeechSynthesisUtterance(text);
+
+        // Configure voice settings for warm, empathetic delivery
+        utterance.rate = 0.95;  // Slightly slower for clarity and calmness
+        utterance.pitch = 1.0;   // Natural pitch
+        utterance.volume = 1.0;  // Full volume
+
+        // Try to select a female voice (more empathetic for mental health support)
+        const voices = window.speechSynthesis.getVoices();
+        const femaleVoice = voices.find(v =>
+          v.name.includes('Female') ||
+          v.name.includes('Samantha') ||
+          v.name.includes('Victoria') ||
+          v.name.includes('Google UK English Female') ||
+          v.name.includes('Microsoft Zira')
+        );
+        if (femaleVoice) {
+          utterance.voice = femaleVoice;
+        }
+
+        utterance.onend = () => resolve();
+        utterance.onerror = (event) => reject(new Error(`Speech synthesis error: ${event.error}`));
+
+        window.speechSynthesis.cancel(); // Clear any pending speech
+        window.speechSynthesis.speak(utterance);
       });
     } catch (err) {
       errorOccurred = true;
