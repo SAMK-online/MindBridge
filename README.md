@@ -249,19 +249,5 @@ This project was built for the NVIDIA Nemotron Hackathon. While primarily a demo
 
 MIT License - See [LICENSE](LICENSE) for details
 
-## 🙏 Acknowledgments
-
-- **NVIDIA** for open-sourcing Nemotron models
-- **LangChain** for the LangGraph framework
-- **OpenRouter** for unified LLM API access
-- **Volunteer therapists** making mental health accessible
-
-## 📧 Contact
-
-**MindBridge Team**
-Project built for NVIDIA Nemotron Hackathon
-
 ---
 
-**Built with ❤️ using NVIDIA Nemotron**
-*Making mental health support accessible to everyone*
