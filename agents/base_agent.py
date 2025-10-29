@@ -109,7 +109,7 @@ class BaseAgent(ABC):
         agent_name: str,
         model_name: Optional[str] = None,
         temperature: float = 0.7,
-        max_tokens: int = 1024,
+        max_tokens: int = 2048,
     ):
         """
         Initialize the base agent.
@@ -129,7 +129,7 @@ class BaseAgent(ABC):
 
             max_tokens: Maximum response length
                        Prevents runaway responses
-                       1024 tokens ≈ 750 words
+                       2048 tokens ≈ 1500 words
         """
 
         self.agent_name = agent_name
