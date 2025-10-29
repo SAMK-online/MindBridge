@@ -251,6 +251,11 @@ async def text_to_speech(request: Request):
         if not text:
             raise HTTPException(status_code=400, detail="Text is required.")
 
+        # Check if API key is configured
+        api_key = os.getenv("ELEVENLABS_API_KEY")
+        if not api_key:
+            raise HTTPException(status_code=500, detail="ELEVENLABS_API_KEY not configured")
+
         # Generate audio with ElevenLabs v2 API
         # Using "Rachel" voice_id: 21m00Tcm4TlvDq8ikWAM - warm, empathetic female voice
         audio_generator = elevenlabs_client.text_to_speech.convert(
@@ -267,11 +272,17 @@ async def text_to_speech(request: Request):
             media_type="audio/mpeg"
         )
 
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"TTS Error: {e}")
         import traceback
-        print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=f"Failed to generate speech: {str(e)}")
+        error_detail = {
+            "error": str(e),
+            "type": type(e).__name__,
+            "traceback": traceback.format_exc()
+        }
+        print(f"TTS Error: {error_detail}")
+        raise HTTPException(status_code=500, detail=error_detail)
 
 
 @app.get("/therapists")
