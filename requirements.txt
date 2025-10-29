@@ -71,6 +71,11 @@ tavily-python==0.5.0
 #   - CORS for frontend integration
 fastapi==0.115.6
 
+# Python Multipart - File upload support
+# Why: Handle file uploads in FastAPI
+# What we use: Therapist license upload endpoint
+python-multipart==0.0.20
+
 # Uvicorn - ASGI server for FastAPI
 # Why: Runs our FastAPI application
 # What we use: Server to host our API during demo
