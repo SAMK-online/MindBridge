@@ -391,6 +391,27 @@ async def end_session(session_id: str):
     return {"message": "Session ended"}
 
 
+@app.get("/debug/agent-init")
+async def debug_agent_init():
+    """Debug endpoint to test agent initialization."""
+    try:
+        # Try to initialize agent
+        agent = IntakeAgent()
+        return {
+            "status": "success",
+            "message": "Agent initialized successfully",
+            "agent_type": type(agent).__name__,
+            "has_llm": hasattr(agent, 'llm')
+        }
+    except Exception as e:
+        import traceback
+        return {
+            "status": "error",
+            "message": str(e),
+            "traceback": traceback.format_exc()
+        }
+
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
