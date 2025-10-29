@@ -151,6 +151,11 @@ pydantic==2.10.4
 # What we use: Validate all config on startup
 pydantic-settings==2.7.0
 
+# Email Validator - Validates email addresses
+# Why: Required by Pydantic's EmailStr type
+# What we use: Therapist email validation in models
+email-validator==2.2.0
+
 # ----------------------------------------------------------------
 # 🧪 TESTING (Important for hackathon reliability!)
 # ----------------------------------------------------------------
