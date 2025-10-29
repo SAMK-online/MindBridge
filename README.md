@@ -4,7 +4,7 @@
 
 [![Built with NVIDIA Nemotron](https://img.shields.io/badge/NVIDIA-Nemotron-76B900?style=for-the-badge&logo=nvidia)](https://developer.nvidia.com/nemotron)
 [![Powered by LangGraph](https://img.shields.io/badge/LangGraph-Multi--Agent-blue?style=for-the-badge)](https://github.com/langchain-ai/langgraph)
-[![TALK TO NIMA](https://img.shields.io/badge/🧠_TALK_TO-NIMA_AI-4A90E2?style=for-the-badge)](https://mind-bridge-ftra.vercel.app/)
+  [![TALK TO NIMA](https://img.shields.io/badge/🧠_TALK_TO-NIMA_AI-14B8A6?style=for-the-badge)](https://mind-bridge-ftra.vercel.app/)
 
 ## 🎯 Mission
 
