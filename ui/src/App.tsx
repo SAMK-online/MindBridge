@@ -5,7 +5,7 @@ import './App.css';
 import { useVoiceRecorder } from './hooks/use-voice-recorder';
 import TherapistsPage from './components/TherapistsPage';
 
-const API_URL = 'http://localhost:8000';
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 const SESSION_ID = 'voice_' + Date.now();
 
 type Stage =

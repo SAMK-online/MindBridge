@@ -1,0 +1,42 @@
+# Similar to .gitignore but for Railway deployment
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.pyc
+
+# Node (frontend - deployed separately on Vercel)
+ui/
+node_modules/
+
+# Development files
+.env.local
+*.log
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# Documentation (not needed for runtime)
+*.md
+!README.md
+
+# Test files
+tests/
+test_*.py
+pytest.ini
+
+# Uploads (runtime generated)
+uploads/
+
+# Demo files (optional)
+streamlit_demo.py
+demo_full_workflow.py
