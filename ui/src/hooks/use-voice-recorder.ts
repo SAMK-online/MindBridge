@@ -1,13 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
 
-// Extend Window interface for SpeechRecognition
-declare global {
-  interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
-  }
-}
-
 const SpeechRecognitionAPI = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
 export const useVoiceRecorder = (onResult: (result: string) => void) => {
