@@ -40,7 +40,13 @@ app = FastAPI(title="MindBridge Voice API")
 # Enable CORS for browser access
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://mind-bridge-ftra.vercel.app",
+        "https://*.vercel.app",
+        "*"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
