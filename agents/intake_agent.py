@@ -67,33 +67,25 @@ class IntakeAgent(BaseAgent):
     def __init__(self):
         super().__init__(
             agent_name="Intake Agent",
-            temperature=0.9,  # Higher temperature for more varied, warm responses
-            max_tokens=200    # Short responses - 2 sentences max
+            temperature=0.85,  # Balanced - warm but consistent
+            max_tokens=250     # Room for 2 natural sentences
         )
 
         logger.info("🤝 Intake Agent initialized - Ready to provide warm welcome")
 
     def get_system_prompt(self) -> str:
         """System prompt for friendly, calming conversation."""
-        return """You are Nima, a warm and empathetic AI companion from MindBridge.
+        return """You are Nima, a warm mental health support AI from MindBridge.
 
-CRITICAL RULES:
-1. READ what the user JUST said - respond to THEIR specific words
-2. Keep responses SHORT - exactly 2 sentences maximum
-3. First sentence: Show you heard them by using THEIR words back
-4. Second sentence: Ask ONE simple, caring question
+Your job: Have a natural, empathetic conversation to understand what's troubling the user.
 
-Example:
-User: "I feel overwhelmed with work"
-You: "It sounds like work is really weighing on you right now. What's been the hardest part?"
+Rules:
+- Keep responses to 2 sentences maximum
+- Be warm, caring, and human
+- Ask thoughtful questions to understand their situation
+- NEVER repeat yourself - each response must be different
 
-NEVER:
-- Repeat the same response twice
-- Use generic phrases like "I'm here with you"
-- Ignore what they just said
-- Write long paragraphs
-
-Be specific. Be brief. Be caring."""
+After 3-4 exchanges, offer to connect them with a volunteer therapist."""
 
     async def process(self, state: AgentState) -> AgentState:
         """
@@ -203,26 +195,14 @@ Be specific. Be brief. Be caring."""
         This is NOT shown to user - it guides the LLM's response.
         """
 
+        # Minimal guidance - trust the model to be smart
         guidance = {
-            self.STAGE_GREETING: (
-                "Open with a heartfelt welcome and a short invitation to share. "
-                "Keep it to one or two sentences, warm and human."
-            ),
-            self.STAGE_CHECK_IN: (
-                "They said hello. Greet them warmly and ask how their day is going. Be brief - 2 sentences."
-            ),
-            self.STAGE_WHAT_BRINGS_YOU: (
-                "They shared how they feel. Use their exact words back to them, then ask what brought them here. 2 sentences."
-            ),
-            self.STAGE_EXPLORE_TROUBLE: (
-                "They told you what's troubling them. Reflect their specific struggle back, then ask what's been hardest. 2 sentences."
-            ),
-            self.STAGE_GATHER_CONTEXT: (
-                "They're opening up. Acknowledge their specific situation using their words, ask one caring follow-up. 2 sentences."
-            ),
-            self.STAGE_READY_FOR_ASSESSMENT: (
-                "Thank them for sharing. Ask if they'd like to connect with a volunteer therapist. 2 sentences."
-            ),
+            self.STAGE_GREETING: "Greet them warmly.",
+            self.STAGE_CHECK_IN: "Ask how they're feeling.",
+            self.STAGE_WHAT_BRINGS_YOU: "Ask what brought them here today.",
+            self.STAGE_EXPLORE_TROUBLE: "Explore their main concern.",
+            self.STAGE_GATHER_CONTEXT: "Learn more about their situation.",
+            self.STAGE_READY_FOR_ASSESSMENT: "Offer to connect them with a volunteer therapist.",
         }
 
         return guidance.get(stage)
@@ -243,7 +223,14 @@ Be specific. Be brief. Be caring."""
 
         num_exchanges = len(user_messages)
 
-        # Faster progression - complete after 4-5 turns
+        # Simple progression: move to next agent after 4-5 turns MAX
+        if num_exchanges >= 5:
+            return self.STAGE_READY_FOR_ASSESSMENT
+
+        if num_exchanges >= 4:
+            return self.STAGE_READY_FOR_ASSESSMENT
+
+        # Early stages - quick progression
         if current_stage == self.STAGE_GREETING and num_exchanges >= 1:
             return self.STAGE_CHECK_IN
 
@@ -251,26 +238,7 @@ Be specific. Be brief. Be caring."""
             return self.STAGE_WHAT_BRINGS_YOU
 
         elif current_stage == self.STAGE_WHAT_BRINGS_YOU and num_exchanges >= 3:
-            # Check if they've shared substantive information
-            last_message = state.messages[-2].content if len(state.messages) >= 2 else ""
-            if len(last_message.split()) > 4:  # More than a few words
-                return self.STAGE_EXPLORE_TROUBLE
-            else:
-                return current_stage  # Stay here until they share more
-
-        elif current_stage == self.STAGE_EXPLORE_TROUBLE and num_exchanges >= 4:
-            # After 4 exchanges, move to final context gathering
-            return self.STAGE_GATHER_CONTEXT
-
-        elif current_stage == self.STAGE_GATHER_CONTEXT:
-            last_user_msg = user_messages[-1].content if user_messages else ""
-            if num_exchanges >= 4 and len(last_user_msg.split()) >= 6:
-                return self.STAGE_READY_FOR_ASSESSMENT
-            return current_stage
-
-        # Demo optimization: after three meaningful turns, be ready to escalate
-        if num_exchanges >= 3:
-            return self.STAGE_READY_FOR_ASSESSMENT
+            return self.STAGE_EXPLORE_TROUBLE
 
         # Default: stay in current stage
         return current_stage
