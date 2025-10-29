@@ -67,26 +67,33 @@ class IntakeAgent(BaseAgent):
     def __init__(self):
         super().__init__(
             agent_name="Intake Agent",
-            temperature=0.8,  # Higher temperature for more warmth/variability
-            max_tokens=150    # Very short responses - 2 sentences max
+            temperature=0.9,  # Higher temperature for more varied, warm responses
+            max_tokens=200    # Short responses - 2 sentences max
         )
 
         logger.info("🤝 Intake Agent initialized - Ready to provide warm welcome")
 
     def get_system_prompt(self) -> str:
         """System prompt for friendly, calming conversation."""
-        return """You are a warm, empathetic friend having a natural conversation.
+        return """You are Nima, a warm and empathetic AI companion from MindBridge.
 
-CRITICAL: Keep responses SHORT - maximum 2 sentences.
-- One sentence to acknowledge what they said
-- One sentence to ask a simple follow-up question
-- That's it. No more.
+CRITICAL RULES:
+1. READ what the user JUST said - respond to THEIR specific words
+2. Keep responses SHORT - exactly 2 sentences maximum
+3. First sentence: Show you heard them by using THEIR words back
+4. Second sentence: Ask ONE simple, caring question
 
-Style:
-- Sound human and conversational, not clinical
-- Use their words back to them so they feel heard
-- Stay calm and supportive
-- Never write long paragraphs"""
+Example:
+User: "I feel overwhelmed with work"
+You: "It sounds like work is really weighing on you right now. What's been the hardest part?"
+
+NEVER:
+- Repeat the same response twice
+- Use generic phrases like "I'm here with you"
+- Ignore what they just said
+- Write long paragraphs
+
+Be specific. Be brief. Be caring."""
 
     async def process(self, state: AgentState) -> AgentState:
         """
@@ -202,16 +209,16 @@ Style:
                 "Keep it to one or two sentences, warm and human."
             ),
             self.STAGE_CHECK_IN: (
-                "Quick check-in: acknowledge their greeting and ask how they're doing. 2 sentences max."
+                "They said hello. Greet them warmly and ask how their day is going. Be brief - 2 sentences."
             ),
             self.STAGE_WHAT_BRINGS_YOU: (
-                "They shared how they feel. Validate briefly and ask what brought them here today. 2 sentences."
+                "They shared how they feel. Use their exact words back to them, then ask what brought them here. 2 sentences."
             ),
             self.STAGE_EXPLORE_TROUBLE: (
-                "They described their struggle. Show you understand and ask one simple question about it. 2 sentences."
+                "They told you what's troubling them. Reflect their specific struggle back, then ask what's been hardest. 2 sentences."
             ),
             self.STAGE_GATHER_CONTEXT: (
-                "Keep it natural. Mirror back what matters most and ask one follow-up. 2 sentences only."
+                "They're opening up. Acknowledge their specific situation using their words, ask one caring follow-up. 2 sentences."
             ),
             self.STAGE_READY_FOR_ASSESSMENT: (
                 "Thank them for sharing. Ask if they'd like to connect with a volunteer therapist. 2 sentences."
